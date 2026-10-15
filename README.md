@@ -2,16 +2,16 @@
 
 A small **BepInEx 5 + Harmony** mod for **Stonewards 0.2.3** that restores the gold ring's pre-0.2.3 multiplicative scaling, with a **200× cap** on the final gold-income multiplier.
 
-> **Experimental:** Developed against the game's 0.2.3 `Assembly-CSharp.dll`. The 0.2.2 assembly has not been compared byte-for-byte, and the mod has **not yet been validated in a running game**. Make a backup of your save data before testing.
+> **Experimental:** Compared the relevant methods in the 0.2.2 and 0.2.3 `Assembly-CSharp.dll` files. The original 0.2.2 **serialized ring assets** have not been compared, and version 0.1.1 has **not yet been tested in game**. Back up your saves before testing.
 
 ## What it changes
 
-- Changes `AddMetaCurrencyMultiplierEffect` from `StatModType.LIMITED_TO_15` to `StatModType.PERCENT_MULT` when the effect is applied or previewed.
+- For the 0.2.3 `AddMetaCurrencyMultiplierEffect` with `StatModType.LIMITED_TO_15`, restores both the **+8% base bonus per upgrade** (`baseValue = 0.08`) and the old multiplicative modifier (`PERCENT_MULT`) when applying or previewing the effect.
 - Caps `ResourceManager.MetaCurrencyBonusMultiplier` at **200×**, including upgrade previews.
 - Leaves other stats, rings, currency balances, and save files untouched by the mod itself.
 - Works independently of [Stonewards Party HUD](https://github.com/thereisnouser/stonewards-party-hud).
 
-The original 0.2.2 behavior has not been independently reproduced in-game. This mod restores the known modifier type and cap; it may not reproduce every historical detail.
+The `AddMetaCurrencyMultiplierEffect.Apply` and `GetNextValue` methods are identical across the supplied 0.2.2 and 0.2.3 assemblies; the key code change is the new diminishing-returns calculation in `CharacterStat.CalculateFinalValue`. The 0.2.1 patch notes specify **+8% per Gold Ring upgrade**; 0.2.2 introduced the **200× cap**. The mod uses these documented values, but full equivalence with the original 0.2.2 ring still requires testing against its serialized asset configuration. Rarity and other bonuses can affect the final multiplier.
 
 ## Requirements
 
@@ -50,7 +50,7 @@ The script builds the DLL and installs only `StonewardsGoldRingScaling.dll` into
 
 1. Launch the **modded** game and check `BepInEx\LogOutput.log` (or the mod-manager log).
 2. Look for `Gold Ring Scaling loaded`.
-3. After applying the gold ring, look for `Gold Ring stat type restored`.
+3. After previewing or applying the gold ring, look for `Gold Ring classic scaling restored: base bonus ... -> 0.08`.
 4. Perform a small test run, verify the earned currency, exit, then relaunch and recheck your balance.
 5. Test multiplayer separately before relying on it. Because the multiplier is evaluated client-side, each participating player may need the mod for consistent results; this has **not** been verified.
 
@@ -74,4 +74,4 @@ Although the mod does not directly edit save files, normal gameplay with increas
 
 ## Project status
 
-**0.1.0 — experimental source release.** Build and in-game testing are the next milestones. No prebuilt DLL or official support is provided.
+**0.1.1 — experimental fix for unexpectedly high scaling.** Restores the documented +8% bonus *and* multiplicative modifier rather than changing only the modifier type. Compile and verify in-game before farming; no prebuilt DLL or official support is provided.
