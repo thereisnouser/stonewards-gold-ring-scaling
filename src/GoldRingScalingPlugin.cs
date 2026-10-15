@@ -76,7 +76,7 @@ namespace StonewardsGoldRingScaling
         }
     }
 
-    [HarmonyPatch(typeof(AddMetaCurrencyMultiplierEffect), nameof(AddMetaCurrencyMultiplierEffect.GetNextValue))]
+    [HarmonyPatch(typeof(AddMetaCurrencyMultiplierEffect), "GetNextValue", new[] { typeof(float) })]
     internal static class GoldRingPreviewPatch
     {
         [HarmonyPrefix]
