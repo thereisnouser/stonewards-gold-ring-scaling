@@ -1,0 +1,19 @@
+# Build artifacts
+bin/
+obj/
+dist/
+*.dll
+*.pdb
+
+# IDE and machine-local files
+.vs/
+.idea/
+.vscode/
+*.user
+*.suo
+*.log
+
+# Local games, mod managers, and save data
+BepInEx/
+Stonewards_Data/
+Saves/
