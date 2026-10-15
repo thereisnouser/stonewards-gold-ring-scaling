@@ -10,7 +10,7 @@ namespace StonewardsGoldRingScaling
     {
         public const string PluginId = "stonewards.goldringscaling";
         public const string PluginName = "Stonewards Gold Ring Scaling";
-        public const string PluginVersion = "0.1.0";
+        public const string PluginVersion = "0.1.1";
         private Harmony? _harmony;
 
         internal static ManualLogSource? Log { get; private set; }
@@ -34,6 +34,12 @@ namespace StonewardsGoldRingScaling
     // Only touch the specific Gold Ring income effect; all other stats stay vanilla.
     internal static class LegacyGoldRingScaling
     {
+        // 0.2.1 introduced +8% per Gold Ring upgrade. 0.2.2 kept this
+        // compounded bonus and capped the final Gold multiplier at x200.
+        // 0.2.3 introduced a different modifier type and serialized magnitude.
+        // Restoring the modifier type without restoring its numeric magnitude
+        // leads to much stronger scaling than intended.
+        private const float LegacyBonusPerUpgrade = 0.08f;
         private static bool _logged;
 
         internal static void Restore(AddMetaCurrencyMultiplierEffect effect)
@@ -41,6 +47,8 @@ namespace StonewardsGoldRingScaling
             if (effect == null)
                 return;
 
+            // Avoid changing other sources of Gold bonuses or already-patched
+            // instances. Only the 0.2.3 diminishing-returns effect is targeted.
             if (effect.statType == StatModType.PERCENT_MULT)
                 return;
 
@@ -56,11 +64,17 @@ namespace StonewardsGoldRingScaling
                 return;
             }
 
+            float previousBonus = effect.baseValue;
+            effect.baseValue = LegacyBonusPerUpgrade;
             effect.statType = StatModType.PERCENT_MULT;
+
             if (!_logged)
             {
                 GoldRingScalingPlugin.Log?.LogInfo(
-                    "Gold Ring stat type restored: LIMITED_TO_15 -> PERCENT_MULT.");
+                    "Gold Ring classic scaling restored: base bonus " +
+                    previousBonus + " -> " + LegacyBonusPerUpgrade +
+                    ", modifier LIMITED_TO_15 -> PERCENT_MULT. " +
+                    "Final Gold multiplier cap: x200.");
                 _logged = true;
             }
         }
